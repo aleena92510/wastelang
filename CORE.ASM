@@ -2,6 +2,19 @@
 ; Welcome to Wastelang
 ; Classic Direct Threaded FORTH written 
 ; in DEBUG.COM
+;
+; Running DEBUG.COM < CORE.ASM will generate a "core.com" file
+; This contains all the FORTH primitives, the inner and outer interpreter
+; compiler and defining words.
+; 
+; After the core.com is generated you can load the LIB.FTH that contains 
+; all the high level FORTH words for control flow statements (if, begin, while, repeat, again, etc)
+; comments, string compliation, etc.
+;
+; After the LIB.FTH is loaded you can use the "save" primitive to dump
+; the memory to a file, wastelang.com.
+; 
+; This executable will contain all the functionality of core.com as well as the words from LIB.FTH
 ; ========================================
 
 ; Output file name
