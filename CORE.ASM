@@ -11,10 +11,15 @@
 ; all the high level FORTH words for control flow statements (if, begin, while, repeat, again, etc)
 ; comments, string compliation, etc.
 ;
+; CORE.COM < LIB.FTH
+;
 ; After the LIB.FTH is loaded you can use the "save" primitive to dump
 ; the memory to a file, wastelang.com.
 ; 
 ; This executable will contain all the functionality of core.com as well as the words from LIB.FTH
+;
+; All FTH files must have DOS line encoding CR LF and should end with CRLF.
+; Use :set fileformat=dos in vim
 ; ========================================
 
 ; Output file name
@@ -36,7 +41,7 @@ jmp ax
 ; The return stack (2x16b) goes up, starts at 220h
 
 a 240
-; INPUT_INDEX
+; INPUT_INDEX points to the next character in the input buffer
 db 0
 
 a 242
@@ -53,11 +58,11 @@ a 302
 db 0 
 
 a 304
-; HERE
+; HERE - points to the next compilation address
 dw B00
 
 a 306
-; Last Defined Word
+; Last Defined Word - dictionary lookup starts here and goes backward
 dw 4000
 
 a 350
@@ -68,6 +73,7 @@ db "wastelng.com",0
 
 a 400
 ; [Subroutine Enter]
+; push current IP (SI) to the rstack and jump back to the word
 mov [bp], si
 add bp, 2
 add ax, 6  ; skip "JMP 400" + nop
@@ -127,6 +133,7 @@ a 500
 ; ========================================
 
 ; [PRIMITIVE]
+; print a character, e.g.: 65 emit will print out A
 a 1000
 db 4,"emit"
 pop dx
@@ -154,6 +161,7 @@ lodsw
 jmp ax
 
 ; [PRIMITIVE]
+; exit the program
 a 1300
 db 3,"bye"
 mov ah, 4C
@@ -229,6 +237,7 @@ lodsw
 jmp ax
 
 ; [WORD]    ( -- len adr )
+; gets the next whitespace separated token
 a 1C00
 db 4,"word"
 nop
@@ -276,6 +285,7 @@ dw 2A05, 1104, 294
 dw 2105
 
 ; [PRIMITIVE]        ( len adr -- IM? XT TRUE | adr len FALSE )
+; find a word in the dictionary
 a 1D00
 db 4,"find"
 pop  dx              ; word to be found in dictionary
@@ -317,6 +327,7 @@ lodsw                ; NEXT
 jmp  ax
 
 ; [PRIMITIVE]           ( a len -- num TRUE | FALSE )
+; convert a string to a number
 a 1E00
 db 4,">num"             
 pop  bx                 ; length
@@ -358,8 +369,9 @@ lodsw                  ; NEXT
 jmp  ax
 
 ; [PRIMITIVE]   ( len a -- )
+; create a new word definition without a body
 a 1F00
-db 5,"mkhdr"    
+db 6,"create"    
 pop  bx         ; word
 pop  cx         ; len
 push si       
@@ -378,6 +390,7 @@ lodsw
 jmp  ax
 
 ; [WORD] 
+; end of word definition - immediate
 a 2000
 db 81,";"
 nop
@@ -391,6 +404,7 @@ dw 1104, 2105,  1B02
 dw 2105
 
 ; [PRIMITIVE]
+; return from a word
 a 2100
 db 4,"exit"
 sub bp, 2
@@ -399,13 +413,14 @@ lodsw
 jmp ax
 
 ; [WORD]
+; begin a word definition
 a 2200
 db 1,":"
 nop
 mov bx, 400
 jmp bx
-;  WORD  MKHDR
-dw 1C05, 1F06
+;  WORD  CREATE
+dw 1C05, 1F07
 dw 1104, BB90, 1B02
 dw 1104, 0400, 1B02
 ; jmp bx
@@ -416,6 +431,7 @@ dw 1104, 1, 1104, 0302, 1A02
 dw 2105
 
 ; [PRIMITIVE]
+; mark last word as immediate
 a 2300
 db 9,"immediate"
 mov di, [306] ; LAST_WORD
@@ -480,6 +496,7 @@ lodsw
 jmp ax
 
 ; [PRIMITIVE]
+; combination of division and modulo
 a 2900
 db 4,"/mod"
 pop bx
@@ -540,6 +557,7 @@ lodsw
 jmp ax
 
 ; [PRIMITIVE]
+; return the depth of the stack
 a 2F00
 db 5,"depth"
 mov ax, 200
@@ -551,6 +569,7 @@ lodsw
 jmp ax
 
 ; [PRIMITIVE]       ( -- c )
+; gets the next character from the STDIN
 a 3000
 db 3,"key"          
 push si             ; save FORTH IP
@@ -668,6 +687,7 @@ lodsw
 jmp ax
 
 ; [PRIMITIVE]
+; save the memory of the program into a COM file
 a 3900
 db 4,"save"
 mov ah, 3C

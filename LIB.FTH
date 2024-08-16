@@ -25,14 +25,14 @@
 : cr 10 emit ;
 
 : variable
-  word mkhdr
+  word create
   48016 , 1024 , 58367 ,
   lit lit ,
   here 4 + ,
   lit exit , 0 , ;
 
 : constant
-  word mkhdr
+  word create
   48016 , 1024 , 58367 ,
   lit lit , ,
   lit exit , ;
