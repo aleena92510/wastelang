@@ -26,14 +26,14 @@
 
 : variable
   word create
-  48016 , 1024 , 58367 ,
+  48016 , 1024 , 58367 , ( subroutine enter )
   lit lit ,
   here 4 + ,
   lit exit , 0 , ;
 
 : constant
   word create
-  48016 , 1024 , 58367 ,
+  48016 , 1024 , 58367 , ( subroutine enter )
   lit lit , ,
   lit exit , ;
 
